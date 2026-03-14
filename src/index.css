@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #0f172a;
+  --color-brand-purple: #7c3aed;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+  
+  .glass-dark {
+    @apply bg-zinc-900/70 backdrop-blur-md border border-zinc-800/50 shadow-2xl;
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-br from-brand-blue to-brand-purple;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-br from-brand-blue to-brand-purple bg-clip-text text-transparent;
+  }
+
+  .gradient-button {
+    @apply bg-gradient-to-r from-brand-blue to-brand-purple text-white shadow-lg shadow-brand-purple/20 hover:shadow-brand-purple/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200;
+  }
+}

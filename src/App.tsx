@@ -38,18 +38,18 @@ const getAI = () => {
 const SidebarItem = ({ icon: Icon, label, active, onClick, count }: any) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
+    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${
       active 
-        ? "bg-black text-white shadow-lg" 
-        : "text-zinc-500 hover:bg-zinc-100"
+        ? "gradient-bg text-white shadow-lg shadow-brand-purple/20 scale-[1.02]" 
+        : "text-zinc-500 hover:bg-zinc-100/50 hover:text-brand-purple"
     }`}
   >
     <div className="flex items-center gap-3">
-      <Icon size={20} />
-      <span className="font-medium">{label}</span>
+      <Icon size={20} className={active ? "text-white" : "group-hover:text-brand-purple"} />
+      <span className="font-semibold tracking-tight">{label}</span>
     </div>
     {count > 0 && (
-      <span className={`text-xs px-2 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-zinc-200"}`}>
+      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${active ? "bg-white/20" : "bg-zinc-100 text-zinc-500"}`}>
         {count}
       </span>
     )}
@@ -57,15 +57,15 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, count }: any) => (
 );
 
 const StatCard = ({ label, value, icon: Icon, color }: any) => (
-  <div className="bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm">
+  <div className="glass p-6 rounded-3xl border border-white/40 shadow-sm hover:shadow-md transition-all duration-300 group">
     <div className="flex items-center justify-between mb-4">
-      <div className={`p-2 rounded-lg ${color}`}>
-        <Icon size={20} className="text-white" />
+      <div className={`p-3 rounded-2xl bg-gradient-to-br ${color} text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+        <Icon size={20} />
       </div>
-      <span className="text-xs font-mono text-zinc-400 uppercase tracking-wider">Live</span>
+      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Live Metrics</span>
     </div>
-    <div className="text-2xl font-bold text-zinc-900">{value}</div>
-    <div className="text-sm text-zinc-500 mt-1">{label}</div>
+    <div className="text-3xl font-black text-zinc-900 tracking-tighter">{value}</div>
+    <div className="text-xs font-bold text-zinc-500 mt-1 uppercase tracking-wider">{label}</div>
   </div>
 );
 
@@ -78,21 +78,21 @@ const Modal = ({ isOpen, onClose, title, children }: any) => (
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          className="absolute inset-0 bg-brand-blue/40 backdrop-blur-md"
         />
         <motion.div 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+          className="relative w-full max-w-lg glass rounded-[40px] shadow-2xl overflow-hidden border border-white/50"
         >
-          <div className="px-8 py-6 border-b border-zinc-100 flex items-center justify-between">
-            <h3 className="text-xl font-bold">{title}</h3>
-            <button onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
-              <X size={20} />
+          <div className="px-10 py-8 border-b border-white/20 flex items-center justify-between">
+            <h3 className="text-2xl font-black tracking-tight gradient-text">{title}</h3>
+            <button onClick={onClose} className="p-2 hover:bg-white/50 rounded-full transition-colors">
+              <X size={24} />
             </button>
           </div>
-          <div className="p-8">
+          <div className="p-10">
             {children}
           </div>
         </motion.div>
@@ -414,16 +414,16 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
   };
 
   return (
-    <div className="min-h-screen bg-[#F9F9F9] flex font-sans text-zinc-900">
+    <div className="min-h-screen bg-slate-50 flex font-sans text-zinc-900 selection:bg-brand-purple/20">
       {/* Sidebar */}
-      <aside className="w-72 bg-white border-r border-zinc-200 p-6 flex flex-col gap-8">
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white font-bold">
+      <aside className="w-72 bg-white/80 backdrop-blur-xl border-r border-zinc-200/50 p-8 flex flex-col gap-10 shadow-2xl z-10">
+        <div className="flex items-center gap-4 px-2">
+          <div className="w-12 h-12 gradient-bg rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-purple/30">
             FTE
           </div>
           <div>
-            <h1 className="font-bold text-lg leading-tight">Digital Employee</h1>
-            <p className="text-xs text-zinc-400 font-mono">v2.0.0-auto</p>
+            <h1 className="font-black text-xl leading-tight tracking-tighter gradient-text">Digital FTE</h1>
+            <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">Enterprise AI</p>
           </div>
         </div>
 
@@ -491,15 +491,15 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-colors shadow-lg"
+              className="gradient-button flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-wider"
             >
-              <Plus size={18} />
+              <Plus size={18} strokeWidth={3} />
               Create Task
             </button>
             <button 
               onClick={generateBriefing}
               disabled={isGeneratingBriefing}
-              className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-bold hover:bg-zinc-50 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-3 bg-white border border-zinc-200 rounded-2xl text-sm font-bold hover:bg-zinc-50 transition-all shadow-sm disabled:opacity-50"
             >
               <Zap size={18} className={isGeneratingBriefing ? "text-amber-500 animate-pulse" : "text-amber-500"} />
               {isGeneratingBriefing ? "Generating..." : "Generate Briefing"}
@@ -520,73 +520,74 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
 
               <div className="grid grid-cols-3 gap-8">
                 <div className="col-span-2 space-y-6">
-                  <div className="bg-white p-8 rounded-3xl border border-zinc-100 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-xl font-bold">Recent Activity</h3>
-                      <button onClick={() => setActiveTab("done")} className="text-xs font-bold text-indigo-600 hover:underline">View All</button>
+                  <div className="glass p-8 rounded-[40px] border border-white/40">
+                    <div className="flex items-center justify-between mb-8">
+                      <h3 className="text-2xl font-black tracking-tight">Recent Activity</h3>
+                      <button onClick={() => setActiveTab("done")} className="text-xs font-bold text-brand-purple hover:underline uppercase tracking-widest">View All</button>
                     </div>
                     <div className="space-y-4">
                       {tasks.slice(0, 5).map((task) => (
-                        <div key={task.id} className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl">
-                          <div className="flex items-center gap-4">
-                            <div className={`p-2 rounded-lg ${task.status === 'done' ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'}`}>
-                              {task.type === 'Email' ? <Mail size={18} /> : <DollarSign size={18} />}
+                        <div key={task.id} className="flex items-center justify-between p-5 bg-white/50 hover:bg-white transition-colors rounded-3xl border border-zinc-100/50 group">
+                          <div className="flex items-center gap-5">
+                            <div className={`p-3 rounded-2xl ${task.status === 'done' ? 'bg-emerald-100 text-emerald-600' : 'bg-brand-purple/10 text-brand-purple'}`}>
+                              {task.type === 'Email' ? <Mail size={20} /> : <DollarSign size={20} />}
                             </div>
                             <div>
-                              <h4 className="font-bold text-sm">{task.title}</h4>
-                              <p className="text-[10px] text-zinc-400 uppercase font-mono">{task.status.replace("_", " ")} • {task.category || task.type} • {task.priority}</p>
+                              <h4 className="font-bold text-zinc-900">{task.title}</h4>
+                              <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest mt-0.5">{task.status.replace("_", " ")} • {task.category || task.type} • {task.priority}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-3">
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDeleteTask(task.id);
                               }}
-                              className="p-2 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              className="p-2 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={18} />
                             </button>
-                            <ChevronRight size={18} className="text-zinc-300" />
+                            <ChevronRight size={20} className="text-zinc-300" />
                           </div>
                         </div>
                       ))}
-                      {tasks.length === 0 && <p className="text-center text-zinc-400 py-10">No recent activity</p>}
+                      {tasks.length === 0 && <p className="text-center text-zinc-400 py-16 font-medium">No recent activity detected.</p>}
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-6">
-                  <div className="bg-black text-white p-8 rounded-3xl shadow-xl">
-                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                      <TrendingUp size={20} />
+                  <div className="gradient-bg text-white p-10 rounded-[40px] shadow-2xl shadow-brand-purple/20 relative overflow-hidden group">
+                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-colors" />
+                    <h3 className="text-xl font-black mb-6 flex items-center gap-3">
+                      <TrendingUp size={24} />
                       AI Insights
                     </h3>
-                    <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-                      The AI worker is currently monitoring {stats.submitted} tasks. Demo mode is {stats.demo_mode ? "ON" : "OFF"}.
+                    <p className="text-white/70 text-sm leading-relaxed mb-8 font-medium">
+                      The AI worker is currently monitoring {stats.submitted} tasks. Demo mode is {stats.demo_mode ? "active" : "inactive"}.
                     </p>
                     {isQuotaExceeded && (
-                      <div className="mb-6 p-4 bg-amber-500/20 border border-amber-500/50 rounded-xl flex items-start gap-3">
-                        <AlertCircle size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                      <div className="mb-8 p-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl flex items-start gap-4">
+                        <AlertCircle size={20} className="text-white shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-xs font-bold text-amber-500 uppercase tracking-wider">Quota Exceeded</p>
-                          <p className="text-[10px] text-zinc-400 mt-1">
+                          <p className="text-xs font-black uppercase tracking-widest">Quota Exceeded</p>
+                          <p className="text-[10px] text-white/60 mt-1 font-medium">
                             AI rate limits reached. Processing will resume automatically soon.
                           </p>
                           <button 
                             onClick={() => setIsQuotaExceeded(false)}
-                            className="text-[10px] font-bold text-white underline mt-2"
+                            className="text-[10px] font-bold text-white underline mt-3 hover:text-white/80 transition-colors"
                           >
                             Retry Now
                           </button>
                         </div>
                       </div>
                     )}
-                    <div className="space-y-3">
-                      <button onClick={() => setActiveTab("submit_query")} className="w-full py-3 bg-white text-black rounded-xl font-bold text-sm hover:bg-zinc-200 transition-colors">
+                    <div className="space-y-4">
+                      <button onClick={() => setActiveTab("submit_query")} className="w-full py-4 bg-white text-brand-blue rounded-2xl font-black text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl">
                         Submit New Query
                       </button>
-                      <button onClick={() => toggleSetting("demo_mode")} className="w-full py-3 bg-zinc-800 text-white rounded-xl font-bold text-sm hover:bg-zinc-700 transition-colors">
+                      <button onClick={() => toggleSetting("demo_mode")} className="w-full py-4 bg-white/10 text-white border border-white/20 rounded-2xl font-black text-sm hover:bg-white/20 transition-all">
                         {stats.demo_mode ? "Disable Demo Mode" : "Enable Demo Mode"}
                       </button>
                     </div>
@@ -598,42 +599,42 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
 
           {activeTab === "submit_query" && (
             <motion.div key="submit_query" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="max-w-2xl mx-auto">
-              <div className="bg-white p-10 rounded-[40px] border border-zinc-100 shadow-xl">
-                <div className="mb-8">
-                  <h3 className="text-2xl font-bold">Submit Business Query</h3>
-                  <p className="text-zinc-500 mt-2">Our AI employee will analyze your request and prepare an execution plan.</p>
+              <div className="glass p-12 rounded-[48px] border border-white/40">
+                <div className="mb-10">
+                  <h3 className="text-3xl font-black tracking-tight gradient-text">Submit Business Query</h3>
+                  <p className="text-zinc-500 mt-3 font-medium">Our AI employee will analyze your request and prepare an execution plan.</p>
                 </div>
-                <form onSubmit={handleCreateTask} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleCreateTask} className="space-y-8">
+                  <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Your Name</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Your Name</label>
                       <input 
                         required
                         value={newTask.client_name}
                         onChange={(e) => setNewTask({ ...newTask, client_name: e.target.value })}
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                        className="w-full px-5 py-4 bg-white/50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 transition-all"
                         placeholder="John Doe"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Email Address</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Email Address</label>
                       <input 
                         required
                         type="email"
                         value={newTask.client_email}
                         onChange={(e) => setNewTask({ ...newTask, client_email: e.target.value })}
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                        className="w-full px-5 py-4 bg-white/50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 transition-all"
                         placeholder="john@company.com"
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Category</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Category</label>
                       <select 
                         value={newTask.category}
                         onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none transition-all"
+                        className="w-full px-5 py-4 bg-white/50 border border-zinc-200 rounded-2xl focus:outline-none transition-all"
                       >
                         <option>General</option>
                         <option>Finance</option>
@@ -643,11 +644,11 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Priority</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Priority</label>
                       <select 
                         value={newTask.priority}
                         onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                        className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none transition-all"
+                        className="w-full px-5 py-4 bg-white/50 border border-zinc-200 rounded-2xl focus:outline-none transition-all"
                       >
                         <option>Low</option>
                         <option>Medium</option>
@@ -656,22 +657,22 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Query Description</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Query Description</label>
                     <textarea 
                       required
                       rows={5}
                       value={newTask.description}
                       onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+                      className="w-full px-5 py-4 bg-white/50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 transition-all"
                       placeholder="Describe what you need the AI employee to do..."
                     />
                   </div>
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="w-full py-4 bg-black text-white rounded-2xl font-bold hover:bg-zinc-800 transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full py-5 gradient-button rounded-[24px] font-black text-lg shadow-2xl flex items-center justify-center gap-3"
                   >
-                    {loading ? <RefreshCw className="animate-spin" size={20} /> : <Zap size={20} className="text-amber-400" />}
+                    {loading ? <RefreshCw className="animate-spin" size={24} /> : <Zap size={24} className="text-amber-400" />}
                     {loading ? "Submitting..." : "Submit to Digital FTE"}
                   </button>
                 </form>
@@ -680,7 +681,7 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
           )}
 
           {(activeTab === "needs_action" || activeTab === "done" || activeTab === "rejected") && (
-            <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-4">
+            <motion.div key={activeTab} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
               {tasks
                 .filter(t => {
                   if (activeTab === "needs_action") return t.status === "submitted" || t.status === "ai_analysis";
@@ -689,21 +690,22 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
                   return true;
                 })
                 .map((task) => (
-                <div key={task.id} className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex gap-4">
-                      <div className={`p-3 rounded-xl ${task.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : task.status === 'rejected' ? 'bg-red-100 text-red-600' : task.status === 'ai_analysis' || task.status === 'executing' ? 'bg-amber-100 text-amber-600' : 'bg-indigo-100 text-indigo-600'}`}>
-                        {task.type === 'Email' ? <Mail size={24} /> : <DollarSign size={24} />}
+                <div key={task.id} className="glass p-8 rounded-[32px] border border-white/40 group">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex gap-5">
+                      <div className={`p-4 rounded-2xl shadow-inner ${task.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : task.status === 'rejected' ? 'bg-red-100 text-red-600' : task.status === 'ai_analysis' || task.status === 'executing' ? 'bg-amber-100 text-amber-600' : 'bg-brand-purple/10 text-brand-purple'}`}>
+                        {task.type === 'Email' ? <Mail size={28} /> : <DollarSign size={28} />}
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold">{task.title}</h3>
-                        <div className="flex gap-3 mt-1">
-                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                        <h3 className="text-xl font-black tracking-tight">{task.title}</h3>
+                        <div className="flex gap-4 mt-2">
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
                             task.priority === 'High' ? 'bg-red-100 text-red-600' : 'bg-zinc-100 text-zinc-500'
                           }`}>
                             {task.priority}
                           </span>
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-1">
+                            <Clock size={12} />
                             {new Date(task.created_at).toLocaleString()}
                           </span>
                         </div>
@@ -711,18 +713,18 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
                     </div>
                     <button 
                       onClick={() => handleDeleteTask(task.id)}
-                      className="p-2 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                      className="p-3 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all opacity-0 group-hover:opacity-100"
                       title="Delete Task"
                     >
-                      <Trash2 size={18} />
+                      <Trash2 size={20} />
                     </button>
                   </div>
-                  <div className="bg-zinc-50 p-4 rounded-2xl">
-                    <p className="text-sm text-zinc-600 leading-relaxed whitespace-pre-wrap">{task.description}</p>
+                  <div className="bg-white/40 p-6 rounded-3xl border border-white/20">
+                    <p className="text-sm text-zinc-600 leading-relaxed whitespace-pre-wrap font-medium">{task.description}</p>
                     {task.plan && (
-                      <div className="mt-4 pt-4 border-t border-zinc-200">
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">AI Execution Plan</h4>
-                        <p className="text-sm text-zinc-500 italic">{task.plan}</p>
+                      <div className="mt-6 pt-6 border-t border-zinc-200/50">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">AI Execution Plan</h4>
+                        <p className="text-sm text-zinc-500 italic font-medium leading-relaxed">{task.plan}</p>
                       </div>
                     )}
                   </div>
@@ -738,64 +740,65 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
           )}
 
           {activeTab === "approvals" && (
-            <motion.div key="approvals" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+            <motion.div key="approvals" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
               {tasks
                 .filter(t => t.status === "awaiting_approval")
                 .map((task) => (
-                <div key={task.id} className="bg-white overflow-hidden rounded-[32px] border border-zinc-100 shadow-xl">
-                  <div className="bg-amber-500 p-4 flex items-center justify-between text-white">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck size={20} />
-                      <span className="text-xs font-bold uppercase tracking-widest">Approval Required</span>
+                <div key={task.id} className="glass overflow-hidden rounded-[48px] border border-white/40 shadow-2xl">
+                  <div className="gradient-bg p-6 flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <ShieldCheck size={24} strokeWidth={2.5} />
+                      <span className="text-sm font-black uppercase tracking-widest">Human Approval Required</span>
                     </div>
-                    <span className="text-[10px] font-mono opacity-80">TASK_ID: {task.id}</span>
+                    <span className="text-[10px] font-black opacity-60 tracking-tighter">REF_ID: {task.id}</span>
                   </div>
-                  <div className="p-8">
-                    <div className="grid grid-cols-3 gap-8 mb-8">
+                  <div className="p-10">
+                    <div className="grid grid-cols-3 gap-10 mb-10">
                       <div className="col-span-2">
-                        <h3 className="text-2xl font-bold mb-2">{task.title}</h3>
-                        <p className="text-zinc-500 text-sm leading-relaxed">{task.description}</p>
+                        <h3 className="text-3xl font-black tracking-tight mb-4">{task.title}</h3>
+                        <p className="text-zinc-500 text-base leading-relaxed font-medium">{task.description}</p>
                       </div>
                       <div className="space-y-4">
-                        <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                          <p className="text-[10px] font-bold text-zinc-400 uppercase mb-1">Client Contact</p>
-                          <p className="text-sm font-bold">{task.client_name || "Unknown"}</p>
-                          <p className="text-xs text-zinc-500">{task.client_email || "No email"}</p>
+                        <div className="p-5 bg-white/50 rounded-3xl border border-zinc-100">
+                          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Client Context</p>
+                          <p className="text-sm font-black text-zinc-900">{task.client_name || "Unknown"}</p>
+                          <p className="text-xs text-zinc-500 font-medium">{task.client_email || "No email"}</p>
                         </div>
-                        <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                          <p className="text-[10px] font-bold text-zinc-400 uppercase mb-1">Category</p>
-                          <p className="text-sm font-bold">{task.category || task.type}</p>
+                        <div className="p-5 bg-white/50 rounded-3xl border border-zinc-100">
+                          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Category</p>
+                          <p className="text-sm font-black text-zinc-900">{task.category || task.type}</p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-zinc-900 rounded-2xl p-6 text-zinc-300 mb-8">
-                      <div className="flex items-center gap-2 mb-4 text-emerald-400">
-                        <Zap size={16} />
-                        <h4 className="text-xs font-bold uppercase tracking-widest">Proposed AI Action</h4>
+                    <div className="bg-brand-blue rounded-[32px] p-8 text-zinc-300 mb-10 shadow-inner relative overflow-hidden">
+                      <div className="absolute right-0 top-0 w-32 h-32 bg-brand-purple/20 blur-[80px]" />
+                      <div className="flex items-center gap-3 mb-6 text-brand-purple">
+                        <Zap size={20} strokeWidth={3} />
+                        <h4 className="text-xs font-black uppercase tracking-widest">Proposed AI Execution</h4>
                       </div>
-                      <p className="text-sm font-mono leading-relaxed mb-4 text-white">
+                      <p className="text-base font-mono leading-relaxed mb-6 text-white bg-black/20 p-4 rounded-xl border border-white/5">
                         {task.action_details || "No action details generated yet."}
                       </p>
-                      <div className="pt-4 border-t border-zinc-800">
-                        <h4 className="text-[10px] font-bold text-zinc-500 uppercase mb-2">Reasoning Plan</h4>
-                        <p className="text-xs italic text-zinc-400">{task.plan}</p>
+                      <div className="pt-6 border-t border-white/10">
+                        <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Reasoning Logic</h4>
+                        <p className="text-xs italic text-zinc-400 leading-relaxed">{task.plan}</p>
                       </div>
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex gap-6">
                       <button 
                         onClick={() => handleReject(task.id)}
-                        className="flex-1 py-4 bg-zinc-100 text-zinc-600 rounded-2xl font-bold hover:bg-zinc-200 transition-all"
+                        className="flex-1 py-5 bg-zinc-100 text-zinc-600 rounded-3xl font-black text-sm uppercase tracking-widest hover:bg-zinc-200 transition-all"
                       >
-                        Reject & Cancel
+                        Reject
                       </button>
                       <button 
                         onClick={() => handleApprove(task.id)}
-                        className="flex-[2] py-4 bg-black text-white rounded-2xl font-bold hover:bg-zinc-800 transition-all shadow-xl flex items-center justify-center gap-2"
+                        className="flex-[2] py-5 gradient-button rounded-3xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3"
                       >
-                        <CheckCircle size={20} className="text-emerald-400" />
-                        Approve & Execute Action
+                        <CheckCircle size={24} strokeWidth={2.5} className="text-emerald-400" />
+                        Approve & Execute
                       </button>
                     </div>
                   </div>
@@ -812,15 +815,15 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
           )}
 
           {activeTab === "briefings" && (
-            <motion.div key="briefings" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+            <motion.div key="briefings" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
               {briefings.map((b) => (
-                <div key={b.id} className="bg-white p-8 rounded-3xl border border-zinc-100 shadow-sm">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold">Monday Briefing - {b.date}</h3>
-                    <span className="text-xs text-zinc-400">{new Date(b.created_at).toLocaleDateString()}</span>
+                <div key={b.id} className="glass p-10 rounded-[40px] border border-white/40 shadow-xl">
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-2xl font-black tracking-tight gradient-text">CEO Briefing • {b.date}</h3>
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{new Date(b.created_at).toLocaleDateString()}</span>
                   </div>
                   <div className="prose prose-zinc max-w-none">
-                    <pre className="whitespace-pre-wrap font-sans text-zinc-600 text-sm leading-relaxed bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
+                    <pre className="whitespace-pre-wrap font-sans text-zinc-600 text-sm leading-relaxed bg-white/50 p-8 rounded-3xl border border-zinc-100 shadow-inner">
                       {b.content}
                     </pre>
                   </div>
@@ -836,27 +839,27 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
           )}
 
           {activeTab === "settings" && (
-            <motion.div key="settings" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-              <div className="bg-white p-8 rounded-3xl border border-zinc-100 shadow-sm">
-                <h3 className="text-xl font-bold mb-6">System Maintenance</h3>
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
-                    <h4 className="font-bold mb-2">Task Management</h4>
-                    <p className="text-sm text-zinc-500 mb-4">Clear all tasks from the database. This includes pending, approved, and completed tasks.</p>
+            <motion.div key="settings" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-10">
+              <div className="glass p-10 rounded-[40px] border border-white/40 shadow-xl">
+                <h3 className="text-2xl font-black tracking-tight mb-8 gradient-text">System Maintenance</h3>
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="p-8 bg-white/50 rounded-3xl border border-zinc-100">
+                    <h4 className="font-black text-lg mb-3">Task Management</h4>
+                    <p className="text-sm text-zinc-500 mb-6 font-medium">Clear all tasks from the database. This includes pending, approved, and completed tasks.</p>
                     <button 
                       onClick={clearAllTasks}
-                      className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-100 transition-colors flex items-center gap-2"
+                      className="px-6 py-3 bg-red-50 text-red-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-colors flex items-center gap-2"
                     >
                       <Trash2 size={16} />
                       Clear All Tasks
                     </button>
                   </div>
-                  <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100">
-                    <h4 className="font-bold mb-2">Briefing Archive</h4>
-                    <p className="text-sm text-zinc-500 mb-4">Permanently delete all generated CEO briefings and reports.</p>
+                  <div className="p-8 bg-white/50 rounded-3xl border border-zinc-100">
+                    <h4 className="font-black text-lg mb-3">Briefing Archive</h4>
+                    <p className="text-sm text-zinc-500 mb-6 font-medium">Permanently delete all generated CEO briefings and reports.</p>
                     <button 
                       onClick={clearAllBriefings}
-                      className="px-4 py-2 bg-red-50 text-red-600 rounded-xl text-sm font-bold hover:bg-red-100 transition-colors flex items-center gap-2"
+                      className="px-6 py-3 bg-red-50 text-red-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-colors flex items-center gap-2"
                     >
                       <Trash2 size={16} />
                       Clear All Briefings
@@ -865,31 +868,31 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
                 </div>
               </div>
 
-              <div className="bg-white p-8 rounded-3xl border border-zinc-100 shadow-sm">
-                <h3 className="text-xl font-bold mb-6">Automation Settings</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl">
+              <div className="glass p-10 rounded-[40px] border border-white/40 shadow-xl">
+                <h3 className="text-2xl font-black tracking-tight mb-8 gradient-text">Automation Settings</h3>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-6 bg-white/50 rounded-3xl border border-zinc-100">
                     <div>
-                      <h4 className="font-bold text-sm">Demo Mode</h4>
-                      <p className="text-xs text-zinc-400">Simulate incoming emails and bank transactions</p>
+                      <h4 className="font-black text-lg">Demo Mode</h4>
+                      <p className="text-xs text-zinc-400 font-medium">Simulate incoming emails and bank transactions</p>
                     </div>
                     <button 
                       onClick={() => toggleSetting("demo_mode")}
-                      className={`w-12 h-6 rounded-full transition-colors relative ${stats.demo_mode ? "bg-emerald-500" : "bg-zinc-300"}`}
+                      className={`w-14 h-7 rounded-full transition-colors relative ${stats.demo_mode ? "gradient-bg" : "bg-zinc-300"}`}
                     >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${stats.demo_mode ? "right-1" : "left-1"}`} />
+                      <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all shadow-md ${stats.demo_mode ? "right-1" : "left-1"}`} />
                     </button>
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl">
+                  <div className="flex items-center justify-between p-6 bg-white/50 rounded-3xl border border-zinc-100">
                     <div>
-                      <h4 className="font-bold text-sm">AI Worker Engine</h4>
-                      <p className="text-xs text-zinc-400">Enable autonomous reasoning and task execution</p>
+                      <h4 className="font-black text-lg">AI Worker Engine</h4>
+                      <p className="text-xs text-zinc-400 font-medium">Enable autonomous reasoning and task execution</p>
                     </div>
                     <button 
                       onClick={() => toggleSetting("worker_running")}
-                      className={`w-12 h-6 rounded-full transition-colors relative ${stats.worker_running ? "bg-emerald-500" : "bg-zinc-300"}`}
+                      className={`w-14 h-7 rounded-full transition-colors relative ${stats.worker_running ? "gradient-bg" : "bg-zinc-300"}`}
                     >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${stats.worker_running ? "right-1" : "left-1"}`} />
+                      <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all shadow-md ${stats.worker_running ? "right-1" : "left-1"}`} />
                     </button>
                   </div>
                 </div>
@@ -901,24 +904,24 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
 
       {/* Create Task Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Create New Task">
-        <form onSubmit={handleCreateTask} className="space-y-6">
+        <form onSubmit={handleCreateTask} className="space-y-8">
           <div>
-            <label className="block text-sm font-bold mb-2">Task Title</label>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Task Title</label>
             <input 
               required
               value={newTask.title}
               onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+              className="w-full px-5 py-4 bg-white/50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 transition-all"
               placeholder="e.g. Respond to Acme Corp Invoice"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-bold mb-2">Type</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Type</label>
               <select 
                 value={newTask.type}
                 onChange={(e) => setNewTask({ ...newTask, type: e.target.value })}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none transition-all"
+                className="w-full px-5 py-4 bg-white/50 border border-zinc-200 rounded-2xl focus:outline-none transition-all"
               >
                 <option>Email</option>
                 <option>Finance</option>
@@ -927,11 +930,11 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
               </select>
             </div>
             <div>
-              <label className="block text-sm font-bold mb-2">Priority</label>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Priority</label>
               <select 
                 value={newTask.priority}
                 onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
-                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none transition-all"
+                className="w-full px-5 py-4 bg-white/50 border border-zinc-200 rounded-2xl focus:outline-none transition-all"
               >
                 <option>Low</option>
                 <option>Medium</option>
@@ -940,20 +943,20 @@ Strategic Insight: Autonomous operations are performing at 98% efficiency. Recom
             </div>
           </div>
           <div>
-            <label className="block text-sm font-bold mb-2">Description</label>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3">Description</label>
             <textarea 
               required
               rows={4}
               value={newTask.description}
               onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+              className="w-full px-5 py-4 bg-white/50 border border-zinc-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-purple/20 transition-all"
               placeholder="Describe the task in detail..."
             />
           </div>
           <button 
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-black text-white rounded-2xl font-bold hover:bg-zinc-800 transition-all shadow-xl disabled:opacity-50"
+            className="w-full py-5 gradient-button rounded-[24px] font-black text-lg shadow-2xl disabled:opacity-50"
           >
             {loading ? "Creating..." : "Create Autonomous Task"}
           </button>
