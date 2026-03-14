@@ -210,9 +210,85 @@ async function startServer() {
     }
   });
 
-  // Stats
-  app.get("/api/stats", (req, res) => {
+  // --- Lazy Workers (Triggered by API calls) ---
+  const runLazyWorkers = async () => {
+    const settings = sqlite.prepare("SELECT key, value FROM settings").all().reduce((acc: any, row: any) => {
+      acc[row.key] = row.value === 'true';
+      return acc;
+    }, {});
+
+    if (!settings.worker_running) return;
+
+    // 1. Demo Query Generation (Lazy)
+    if (settings.demo_mode) {
+      const lastGenRow = sqlite.prepare("SELECT value FROM settings WHERE key = 'last_demo_gen'").get();
+      const lastGen = lastGenRow ? parseInt(lastGenRow.value) : 0;
+      const now = Date.now();
+      
+      if (now - lastGen > 15000) { // Every 15 seconds
+        const names = ["Sarah Khan", "David Lee", "Michael Chen", "Emma Wilson", "James Rodriguez", "Aisha Patel", "Liam O'Connor", "Sofia Rossi"];
+        const emails = ["sarah.khan@example.com", "david.lee@example.com", "m.chen@tech.co", "emma.w@design.studio", "james.rod@global.biz", "aisha.p@consulting.com", "liam.oc@startup.io", "s.rossi@fashion.it"];
+        const requests = [
+          "Please send invoice for website design",
+          "Need help scheduling meeting with the board",
+          "Update the financial report for Q1",
+          "Send a follow-up email to the new leads",
+          "Review the contract for the upcoming partnership",
+          "Organize the team building event for next month",
+          "Prepare the presentation for Friday's demo",
+          "Check the status of the server migration"
+        ];
+        const categories = ["Finance", "Meeting", "Finance", "Communication", "Legal", "Operations", "Marketing", "Technical"];
+        const priorities = ["High", "Medium", "Low", "Medium", "High", "Low", "High", "Medium"];
+
+        const index = Math.floor(Math.random() * names.length);
+        const name = names[index];
+        const email = emails[index];
+        const request = requests[index];
+        const category = categories[index];
+        const priority = priorities[index];
+        
+        const title = `Query: ${request.substring(0, 30)}...`;
+        
+        sqlite.prepare(
+          "INSERT INTO tasks (title, type, priority, description, client_name, client_email, category, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'submitted')"
+        ).run(title, category, priority, request, name, email, category);
+        
+        sqlite.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('last_demo_gen', ?)").run(now.toString());
+        logAction("demo_query_generated", "system", "demo_generator", `New query from ${name}`);
+      }
+    }
+
+    // 2. AI Execution Worker (Lazy)
+    const approvedTask = sqlite.prepare("SELECT * FROM tasks WHERE status = 'approved' LIMIT 1").get();
+    if (approvedTask) {
+      sqlite.prepare("UPDATE tasks SET status = 'executing', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(approvedTask.id);
+      
+      // We simulate the execution here. In a real serverless environment, 
+      // this might be a separate function or a background task.
+      // For this demo, we'll do a quick "execution".
+      setTimeout(async () => {
+        const actionResult = `Successfully completed ${approvedTask.type} action: ${approvedTask.action_details}`;
+        sqlite.prepare("UPDATE tasks SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(approvedTask.id);
+        logAction("task_completed", `Task #${approvedTask.id}`, "ai_worker_backend", actionResult);
+        
+        if (approvedTask.client_email) {
+          await sendEmail(
+            approvedTask.client_email,
+            "Task Completed",
+            `Hi ${approvedTask.client_name},\n\nWe are pleased to inform you that your request "${approvedTask.title}" has been successfully completed.\n\nDetails: ${approvedTask.action_details}\n\nThank you for using Digital FTE.\n\nBest regards,\nAutonomous Systems Team`
+          );
+        }
+      }, 1000);
+    }
+  };
+
+  // Stats (Heartbeat for Lazy Workers)
+  app.get("/api/stats", async (req, res) => {
     try {
+      // Trigger lazy workers on every stats call (heartbeat)
+      await runLazyWorkers();
+
       const stats = {
         submitted: sqlite.prepare("SELECT COUNT(*) as count FROM tasks WHERE status = 'submitted'").get().count,
         approvals: sqlite.prepare("SELECT COUNT(*) as count FROM tasks WHERE status = 'awaiting_approval'").get().count,
@@ -305,128 +381,9 @@ async function startServer() {
     }
   });
 
-  // --- AI Worker Logic ---
-
-  const aiWorkerLoop = async () => {
-    const workerRunning = sqlite.prepare("SELECT value FROM settings WHERE key = 'worker_running'").get().value === 'true';
-    if (!workerRunning) return;
-
-    // 1. Process Approved Tasks -> Executing -> Completed
-    const approvedTasks = sqlite.prepare("SELECT * FROM tasks WHERE status = 'approved' LIMIT 1").all();
-    for (const task of approvedTasks) {
-      // Transition to executing
-      sqlite.prepare("UPDATE tasks SET status = 'executing', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(task.id);
-      await executeTaskAction(task);
-    }
-  };
-
-  const executeTaskAction = async (task: any) => {
-    // CRITICAL SAFETY RULE: Only execute if status was 'approved' (now 'executing')
-    console.log(`[Worker] Executing approved task: ${task.title}`);
-    
-    // Simulate Action
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    const actionResult = `Successfully completed ${task.type} action: ${task.action_details}`;
-    
-    // Move to completed
-    sqlite.prepare("UPDATE tasks SET status = 'completed', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(task.id);
-    logAction("task_completed", `Task #${task.id}`, "ai_worker_backend", actionResult);
-    
-    // Send completion email if applicable
-    if (task.client_email) {
-      await sendEmail(
-        task.client_email,
-        "Task Completed",
-        `Hi ${task.client_name},\n\nWe are pleased to inform you that your request "${task.title}" has been successfully completed.\n\nDetails: ${task.action_details}\n\nThank you for using Digital FTE.\n\nBest regards,\nAutonomous Systems Team`
-      );
-    }
-  };
-
-  const logAction = (type: string, target: string, actor: string, details: string) => {
-    sqlite.prepare("INSERT INTO logs (action_type, actor, target, details) VALUES (?, ?, ?, ?)")
-      .run(type, actor, target, details);
-  };
-
-  // --- Watchers & Generators ---
-  const runWatchers = () => {
-    // Demo Query Generator: Continuously generates simulated client queries
-    setInterval(() => {
-      const demoMode = sqlite.prepare("SELECT value FROM settings WHERE key = 'demo_mode'").get().value === 'true';
-      if (!demoMode) return;
-
-      const names = ["Sarah Khan", "David Lee", "Michael Chen", "Emma Wilson", "James Rodriguez", "Aisha Patel", "Liam O'Connor", "Sofia Rossi"];
-      const emails = ["sarah.khan@example.com", "david.lee@example.com", "m.chen@tech.co", "emma.w@design.studio", "james.rod@global.biz", "aisha.p@consulting.com", "liam.oc@startup.io", "s.rossi@fashion.it"];
-      const requests = [
-        "Please send invoice for website design",
-        "Need help scheduling meeting with the board",
-        "Update the financial report for Q1",
-        "Send a follow-up email to the new leads",
-        "Review the contract for the upcoming partnership",
-        "Organize the team building event for next month",
-        "Prepare the presentation for Friday's demo",
-        "Check the status of the server migration"
-      ];
-      const categories = ["Finance", "Meeting", "Finance", "Communication", "Legal", "Operations", "Marketing", "Technical"];
-      const priorities = ["High", "Medium", "Low", "Medium", "High", "Low", "High", "Medium"];
-
-      const index = Math.floor(Math.random() * names.length);
-      const name = names[index];
-      const email = emails[index];
-      const request = requests[index];
-      const category = categories[index];
-      const priority = priorities[index];
-      
-      const title = `Query: ${request.substring(0, 30)}...`;
-      
-      console.log(`[Demo Generator] Generating query from ${name}`);
-      sqlite.prepare(
-        "INSERT INTO tasks (title, type, priority, description, client_name, client_email, category, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'submitted')"
-      ).run(title, category, priority, request, name, email, category);
-      
-      logAction("demo_query_generated", "system", "demo_generator", `New query from ${name}`);
-    }, 15000); // Every 15 seconds
-
-    // Gmail Watcher: Simulates incoming emails
-    setInterval(() => {
-      const demoMode = sqlite.prepare("SELECT value FROM settings WHERE key = 'demo_mode'").get().value === 'true';
-      if (!demoMode) return;
-
-      const chance = Math.random();
-      if (chance < 0.3) { // 30% chance every 20s
-        const names = ["Alice Smith", "Bob Jones", "Charlie Brown", "Diana Prince"];
-        const subjects = ["Question about invoice", "Meeting request", "Feedback on project", "Urgent: System access"];
-        const name = names[Math.floor(Math.random() * names.length)];
-        const subject = subjects[Math.floor(Math.random() * subjects.length)];
-        const email = `${name.toLowerCase().replace(' ', '.')}@example.com`;
-        
-        console.log(`[Watcher] New simulated email from ${name}`);
-        sqlite.prepare(
-          "INSERT INTO tasks (title, type, priority, description, client_name, client_email, category, status) VALUES (?, 'Email', 'Medium', ?, ?, ?, 'Communication', 'submitted')"
-        ).run(`Email: ${subject}`, `Inbound email from ${name}: "${subject}"`, name, email);
-        logAction("watcher_event", "Gmail", "gmail_watcher", `New email from ${name}`);
-      }
-    }, 20000);
-
-    // Finance Watcher: Simulates financial events
-    setInterval(() => {
-      const demoMode = sqlite.prepare("SELECT value FROM settings WHERE key = 'demo_mode'").get().value === 'true';
-      if (!demoMode) return;
-
-      const chance = Math.random();
-      if (chance < 0.2) { // 20% chance every 45s
-        const vendors = ["Cloud Hosting", "Office Supplies", "Software License", "Marketing Agency"];
-        const vendor = vendors[Math.floor(Math.random() * vendors.length)];
-        const amount = (Math.random() * 500 + 50).toFixed(2);
-        
-        console.log(`[Watcher] New simulated invoice from ${vendor}`);
-        sqlite.prepare(
-          "INSERT INTO tasks (title, type, priority, description, client_name, client_email, category, status) VALUES (?, 'Finance', 'High', ?, ?, 'billing@system.local', 'Finance', 'submitted')"
-        ).run(`Invoice: ${vendor} - $${amount}`, `New invoice received from ${vendor} for the amount of $${amount}. Needs verification.`, vendor);
-        logAction("watcher_event", "Bank", "finance_watcher", `New invoice from ${vendor}`);
-      }
-    }, 45000);
-  };
+  // --- Cleanup ---
+  // Background intervals removed for serverless compatibility.
+  // Logic moved to "Lazy Workers" triggered by /api/stats heartbeat.
 
   // Create Test Task if it doesn't exist
   const testTaskExists = sqlite.prepare("SELECT id FROM tasks WHERE title = 'Send invoice email to client'").get();
@@ -436,9 +393,6 @@ async function startServer() {
     ).run("Send invoice email to client", "Please send the monthly invoice for March 2026 to the client.");
     console.log("[System] Created test task: 'Send invoice email to client'");
   }
-
-  runWatchers();
-  setInterval(aiWorkerLoop, 5000);
 
   // --- Vite Middleware ---
   if (process.env.NODE_ENV !== "production") {

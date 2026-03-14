@@ -130,13 +130,29 @@ export default function App() {
         fetch("/api/briefings")
       ]);
       
-      setStats(await statsRes.json());
-      setTasks(await tasksRes.json());
-      setBriefings(await briefingsRes.json());
+      if (statsRes.ok) setStats(await statsRes.json());
+      if (tasksRes.ok) setTasks(await tasksRes.json());
+      if (briefingsRes.ok) setBriefings(await briefingsRes.json());
     } catch (err) {
       console.error("Failed to fetch data", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const extractJSON = (text: string) => {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) {
+        try {
+          return JSON.parse(match[0]);
+        } catch (e2) {
+          throw new Error("Failed to parse extracted JSON");
+        }
+      }
+      throw new Error("No JSON found in response");
     }
   };
 
@@ -148,7 +164,7 @@ export default function App() {
 
   // AI Worker (Frontend)
   useEffect(() => {
-    if (!stats.worker_running || isQuotaExceeded) return;
+    if (!stats.worker_running) return;
 
     let isMounted = true;
 
@@ -157,11 +173,12 @@ export default function App() {
       if (pendingTasks.length === 0) return;
 
       const ai = getAI();
+      let localQuotaExceeded = isQuotaExceeded;
       
       for (const task of pendingTasks) {
         if (!isMounted || !stats.worker_running) break;
         
-        console.log(`[AI Worker] Reasoning for task: ${task.title}`);
+        console.log(`[AI Worker] Reasoning for task: ${task.title} (Quota Fallback: ${localQuotaExceeded})`);
         try {
           // Transition to ai_analysis
           await fetch(`/api/tasks/${task.id}/status`, {
@@ -172,7 +189,7 @@ export default function App() {
 
           let result;
           
-          if (!ai || isQuotaExceeded) {
+          if (!ai || localQuotaExceeded) {
             // Demo AI Mode Fallback - FORCE APPROVAL
             console.log("[AI Worker] Using Demo AI Mode fallback (Forcing Approval)");
             result = {
@@ -205,31 +222,32 @@ export default function App() {
               config: { responseMimeType: "application/json" }
             });
 
-            result = JSON.parse(response.text);
+            result = extractJSON(response.text);
             // Force true if AI is unsure or if it's an action
             result.requires_approval = true; 
           }
 
-          await fetch(`/api/tasks/${task.id}/reasoning`, {
+          const reasoningRes = await fetch(`/api/tasks/${task.id}/reasoning`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(result)
           });
           
-          if (ai) setIsQuotaExceeded(false); 
+          if (!reasoningRes.ok) throw new Error(`Failed to save reasoning: ${reasoningRes.status}`);
+
+          if (ai && !localQuotaExceeded) setIsQuotaExceeded(false); 
           fetchAll();
           
           await sleep(2000);
         } catch (error: any) {
-          console.error(`[AI Worker] Reasoning failed for ${task.id}:`, error);
+          const isQuota = error?.message?.includes("429") || error?.message?.includes("RESOURCE_EXHAUSTED") || (error?.status === 429);
           
-          // Check for quota exceeded error
-          if (error?.message?.includes("429") || error?.message?.includes("RESOURCE_EXHAUSTED")) {
+          if (isQuota) {
+            console.warn(`[AI Worker] Quota exceeded for task ${task.id}. Switching to Demo AI Mode immediately.`);
+            localQuotaExceeded = true;
             setIsQuotaExceeded(true);
-            // Don't break anymore, let it fallback to demo mode in next iteration if desired, 
-            // or just break and wait for retry. The user said "switch to Demo AI Mode".
-            // I'll break for now to let the user see the error, but the logic above handles the fallback if they click "Retry" or if it's already exceeded.
-            break; 
+          } else {
+            console.error(`[AI Worker] Reasoning failed for ${task.id}:`, error);
           }
         }
       }
@@ -338,23 +356,46 @@ export default function App() {
     setIsGeneratingBriefing(true);
     try {
       const ai = getAI();
-      if (!ai) throw new Error("AI not configured");
-
+      
       const completedTasks = tasks.filter(t => t.status === 'completed');
       const taskList = completedTasks.map(t => t.title).join(", ");
+      let content = "";
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `You are a Senior Business Analyst AI. 
-        Generate a "Monday Morning CEO Briefing" based on:
-        - Completed Tasks: ${taskList || "None yet"}
-        - Simulated Revenue: $15,400
-        - System Status: All watchers active
+      if (!ai || isQuotaExceeded) {
+        console.log("[Briefing] Using Demo AI Mode fallback for briefing");
+        content = `[DEMO BRIEFING] Executive Summary: The Digital FTE has successfully processed ${completedTasks.length} tasks this period. Revenue remains stable at $15,400. System status is optimal. 
         
-        Sections: Executive Summary, Revenue Analysis, Completed Tasks, Bottlenecks, Upcoming Deadlines, Cost Optimization Suggestions.`,
-      });
-
-      const content = response.text || "Failed to generate briefing.";
+Completed Tasks: ${taskList || "No tasks completed in this window."}
+        
+Strategic Insight: Autonomous operations are performing at 98% efficiency. Recommend increasing task throughput for high-priority categories.`;
+      } else {
+        try {
+          const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: `You are a Senior Business Analyst AI. 
+            Generate a "Monday Morning CEO Briefing" based on:
+            - Completed Tasks: ${taskList || "None yet"}
+            - Simulated Revenue: $15,400
+            - System Status: All watchers active
+            
+            Sections: Executive Summary, Revenue Analysis, Completed Tasks, Bottlenecks, Upcoming Deadlines, Cost Optimization Suggestions.`,
+          });
+          content = response.text || "Failed to generate briefing.";
+        } catch (aiErr: any) {
+          if (aiErr?.message?.includes("429") || aiErr?.message?.includes("RESOURCE_EXHAUSTED")) {
+            setIsQuotaExceeded(true);
+            // Recursive call or just use fallback immediately
+            console.warn("[Briefing] Quota hit during generation, using fallback.");
+            content = `[DEMO BRIEFING] Executive Summary: The Digital FTE has successfully processed ${completedTasks.length} tasks this period. Revenue remains stable at $15,400. System status is optimal. 
+        
+Completed Tasks: ${taskList || "No tasks completed in this window."}
+        
+Strategic Insight: Autonomous operations are performing at 98% efficiency. Recommend increasing task throughput for high-priority categories.`;
+          } else {
+            throw aiErr;
+          }
+        }
+      }
       
       const res = await fetch("/api/briefings", { 
         method: "POST",
@@ -522,7 +563,7 @@ export default function App() {
                       AI Insights
                     </h3>
                     <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-                      The AI worker is currently monitoring {stats.pending} tasks. Demo mode is {stats.demo_mode ? "ON" : "OFF"}.
+                      The AI worker is currently monitoring {stats.submitted} tasks. Demo mode is {stats.demo_mode ? "ON" : "OFF"}.
                     </p>
                     {isQuotaExceeded && (
                       <div className="mb-6 p-4 bg-amber-500/20 border border-amber-500/50 rounded-xl flex items-start gap-3">
